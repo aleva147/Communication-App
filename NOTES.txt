@@ -329,7 +329,7 @@ Inicijalni Modal: (Modal za kreiranje sobe)
 - Sa shadcn uvezes Dialog, Input, Form.
 
 - Novi folder u components koji zoves 'modals'. U njemu initial-modal.tsx.
-  U (setup)/page.tsx radis return <InitialModal /> kad nije nadjen nijedna soba.
+  U (setup)/page.tsx radis return <InitialModal /> kad nije nadjen nijedan server.
 
 - Zod je biblioteka za validaciju sema u typescriptu (mi cemo koristiti za validaciju formata forme koju korisnik popunjava).
 
@@ -477,7 +477,7 @@ Invitations:
 	Patch je update zahtev, ne pise se Update u axiosu (kao sto imas get,post,update,delete)
 
 
-- Sad treba da napravimo da taj generisani link stvarno odvede do sobe kad se iskoristi.
+- Sad treba da napravimo da taj generisani link stvarno odvede do servera kad se iskoristi.
 	Napravis app/(invite)/(routes)/invite/[inviteCode]/page.tsx.
 	
 
@@ -521,7 +521,7 @@ Manage Members:
 
 - Dodas u components/providers/modal-provider.tsx  <MembersModal />
 
-- Dodas onClick za dugme za manage members u room-header.tsx.
+- Dodas onClick za dugme za manage members u server-header.tsx.
 
 - Napravis components/user-avatar.tsx
   npx shadcn-ui@latest add avatar
@@ -548,11 +548,11 @@ Channel Creation:
 
 - Dodas u components/providers/modal-provider.tsx  <CreateChannelModal />
 
-- Dodas onClick za dugme za channel creation u room-header.tsx.
+- Dodas onClick za dugme za channel creation u server-header.tsx.
 
 npx shadcn-ui@latest add select
 
-- Napravis app/api/channels/route.ts za obradu zahteva za kreiranjem sobe da te create dugme ne bi odvelo na 404 not found error.
+- Napravis app/api/channels/route.ts za obradu zahteva za kreiranjem servera da te create dugme ne bi odvelo na 404 not found error.
 
 
 
@@ -561,14 +561,257 @@ npx shadcn-ui@latest add select
 Delete and Leave Room:
 ======================
 
-U use-modal-store.ts dodas kao tip i "leaveRoom" i "deleteRoom". Ostalo sve vec ima.
+- U use-modal-store.ts dodas kao tip i "leaveRoom" i "deleteRoom". Ostalo sve vec ima.
 
-Napravis components/modals/leave-room-modal.tsx i delete-room-modal.
+- Napravis components/modals/leave-room-modal.tsx i delete-room-modal.
 
-Dodas u components/providers/modal-provider.tsx  <LeaveRoomModal /> i <DeleteRoomModal />
+- Dodas u components/providers/modal-provider.tsx  <LeaveRoomModal /> i <DeleteRoomModal />
 
-Dodas onClick za dugme za leave room i delete room u room-header.tsx.
+- Dodas onClick za dugme za leave room i delete room u room-header.tsx.
 
-Napravis app/api/rooms/[roomId]/leave/route.ts za leave funkcionalnost.
-Prosiris app/api/rooms/[roomId]/route.ts za delete funkcionalnost.
+- Napravis app/api/rooms/[roomId]/leave/route.ts za leave funkcionalnost.
+- Prosiris app/api/rooms/[roomId]/route.ts za delete funkcionalnost.
 
+
+
+
+============================================================================================
+
+
+
+
+============
+Room Search:
+============
+
+- Prosirs room-sidebar.tsx
+
+- Napravis components/room/room-search.tsx
+ 
+- npx shadcn-ui@latest add command
+
+
+
+
+==================
+Room Channel List:
+==================
+
+- Prosiris room-sidebar.tsx
+
+- Napravis components/room/room-section.tsx
+- Napravis components/room/room-channel.tsx
+- Napravis components/room/room-member.tsx
+
+- Prosiris ModalData u hooks/use-modal-store.ts sa ChannelType, kako bi kad se klikne plusic kod audio channels u meniju za kreaciju kanala 
+  bio vec izabran audio kanal kao tip, i slicno.
+- Prosiris components/modal/create-channel-modal.tsx da vec bude selektovan odgovarajuci tip kanala kad se dodaje novi kanal.
+
+
+
+
+========================
+Edit and Delete Channel:
+========================
+
+- U use-modal-store.ts prosiris ModalType sa "deleteChannel" i "editChannel", i ModalData da ima channel.
+
+- Napravis components/modals/delete-channel-modal.tsx i edit-channel-modal.tsx.
+
+- Prosiris modal-provider.tsx.
+
+- Dodas onClick u components/room/room-channel.tsx na delete dugme i edit dugme.
+
+
+
+
+================
+Channel ID Page:
+================
+
+- Napravis app/api/channels/[channelId]/route.ts.
+
+- Napravis (main)/(routes)/rooms/[roomId]/channels/[channelId]/page.tsx (tu se stize kad se klikne na neki od kanala unutar servera)
+
+- Napravis (main)/(routes)/rooms/[roomId]/conversations/[memberId]/page.tsx (tu se stize kad se klikne na nekog membera unutar servera)
+
+- Promenis (main)/(rotues)/rooms/[roomId]/page.tsx da prikazuje general channel, a ne nijedan.
+
+
+
+
+===============
+Channel Header: (ono sto se vidi na vrhu sadrzaja kanala kad se izabere neki od kanala sobe) 
+===============
+
+Prosiris (main)/(routes)/rooms/[roomId]/channels/[channelId]/page.tsx
+
+Napravis components/chat/chat-header.tsx
+
+npx shadcn-ui@latest add sheet
+
+Napravis components/mobile-toggle.tsx.  Ovo ti je kad velicina ekrana opadne da se koristi hamburger meni za levi sidebar.
+
+
+
+
+=================================================================================================================
+
+
+
+
+==================
+Doradjivanje baze: (da bi podrzala i konverzacije (direct messages))
+==================
+
+- Prosiris  prisma/schema.prisma modelima Message, Conversation, DirectMessage
+
+npx prisma generate
+npx prisma db push
+
+
+
+
+====================
+Conversations setup: (direct messaging)
+====================
+
+- Napravis lib/conversation.ts. 
+  - Kad se klikne na osobu, treba proveriti da li je vec postojala konverzacija sa njom ili je ovo prvi put (treba da se napravi).
+  - MemberOne je onaj koji je napravio konverzaciju.
+
+- Prosiris (main)/(routes)/rooms/[roomId]/conversations/[memberId]/page.tsx
+
+- Prosiris components/chat/chat-header.tsx
+
+
+
+
+==========
+Socket.io:
+==========
+
+npm i socket.io
+npm i socket.io-client
+
+- Napravis communication-app/pages/api/socket/io.ts
+- Prosiris communication-app/types.ts
+
+
+- Napravis components/providers/socket-provider.tsx
+- U app/layout.tsx obmotas ModalProvider i {childer} SocketProviderom.
+
+
+npx shadcn-ui@latest add badge (zelen/siv kruzic uz profilnu koji indikuje da li je onlajn korisnik)
+
+
+- Napravis components/socket-indicator.
+
+- Prosiris chat-header.
+
+
+------------------
+Iz nekog njemu nepoznatog razloga ne radi u novijoj next.js verziji (crveni warning u konzoli baca). Dve opcije da popravis:
+1) Da ne koristis socket.io nego da hardkodujes refatchInterval na 1000 tako da se uvek radi polling.
+ili 2) next.config.js dodas webpack: (...)
+       package.json promenis verziju next na 13.4.12 i eslint-config-next isto.
+       Onda u konzoli npm i da se instalira sve iznova po tim verzijama.
+3) Gugluj kako u novoj verziji next.js
+-----------------
+
+
+
+
+=====================
+Chat input component:
+=====================
+
+- Napravis components/chat/chat-input.tsx
+- Prosiris app/(main)/(routes)/rooms/[roomId]/channels/[channelId]/page.tsx
+
+
+- Napravis pages/api/socket/messages.ts
+
+- Napravis lib/current-profile-pages.ts (jer pages folder radi tako sto mora da se prosledi NextApiRequest kao req i da se iskoristi getAuth f-ja, ne moze auth f-ja kao u current-profile)
+
+
+
+
+====================
+Message Attachments:
+====================
+
+- Prosiris hooks/use-modal-store.ts: ModalType dodatno da ima messageFile, ModalData dodatno da ima apiUrl i query.
+
+- Napravis components/modals/message-file-modal.tsx
+
+- Prosiris chat-input.tsx dodavanjem onClick.
+
+- Prosiris components/file-upload.tsx da moze showcase za izabrani pdf fajl da uradi.
+
+
+
+
+==========
+Emoji bar:
+==========
+
+npx shadcn-ui@latest add popover 
+npm i emoji-mart @emoji-mart/data @emoji-mart/react
+
+- Napravis components/emoji-picker.tsx
+- Prosiris components/chat/chat-input.tsx
+
+
+
+
+========================
+Chat Messages Component:
+========================
+
+- Prosiris (main)/(routes)/rooms/[roomId]/channels/[channelId]/page.tsx sa ChatMessages.
+- Napravis components/chat/chat-messages.tsx
+- Napravis components/chat/chat-welcome.tsx
+
+
+npm i @tanstack/react-query
+- Napravis components/providers/query-provider.tsx
+- U app/layout.tsx obmotaj children sa QueryProvider.
+
+
+- Napravis hooks/use-chat-query.ts
+
+- Prosiris components/chat/chat-messages.tsx
+
+- Napravis app/api/messages/route.ts za dohvatanje poruka
+
+
+
+
+====================
+Chat Item Component: (izgled ispisanih poruka, da ne budu samo izlistane)
+====================
+
+- Napravis components/chat/chat-item.tsx
+- Prosiris components/chat/chat-messages.tsx sa ChatItem.
+
+npm i date-fns
+
+- Kako ne bi nastao 404 not found error kad pokusas da sacuvas editovanu poruku, 
+  Napravis pages/api/socket/messages/[messageId].ts
+  Premestis messages.ts u messages i preimenujes u index.ts
+
+
+
+
+===============
+Delete Message:
+===============
+
+- Prosiris use-modal-store ModalType.
+
+- Napravis components/modals/delete-message-modal
+
+- Prosiris components/providers/modal-provider.tsx.
+
+- Prosiris chat-item.

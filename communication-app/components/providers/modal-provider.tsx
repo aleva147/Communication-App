@@ -10,6 +10,10 @@ import { MembersModal } from "../modals/members-modal";
 import { CreateChannelModal } from "../modals/creaete-channel-modal";
 import { LeaveRoomModal } from "../modals/leave-room-modal";
 import { DeleteRoomModal } from "../modals/delete-room-modal";
+import { DeleteChannelModal } from "../modals/delete-channel-modal";
+import { EditChannelModal } from "../modals/edit-channel-modal";
+import { MessageFileModal } from "../modals/message-file-modal";
+import { DeleteMessageModal } from "../modals/delete-message-modal";
 
 
 export const ModalProvider = () => {
@@ -34,9 +38,10 @@ export const ModalProvider = () => {
       <CreateChannelModal />
       <LeaveRoomModal />
       <DeleteRoomModal />
-      {/* <DeleteChannelModal /> */}
-      {/* <EditChannelModal /> */}
-      {/* <DeleteMessageModal /> */}
+      <DeleteChannelModal />
+      <EditChannelModal />
+      <MessageFileModal />
+      <DeleteMessageModal />
     </>
   )
 }

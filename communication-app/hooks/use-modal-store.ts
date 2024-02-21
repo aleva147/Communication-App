@@ -2,7 +2,7 @@ import { Channel, ChannelType, Room } from "@prisma/client";
 import { create } from "zustand";
 
 
-export type ModalType = "createRoom" | "invite" | "editRoom" | "members" | "createChannel" |  "leaveRoom" | "deleteRoom" | "deleteChannel" | "editChannel" | "messageFile" | "deleteMessage";;
+export type ModalType = "createRoom" | "invite" | "editRoom" | "members" | "createChannel" |  "leaveRoom" | "deleteRoom" | "deleteChannel" | "editChannel" | "messageFile" | "deleteMessage";
 
 
 // Bilo sta od ovoga moze da se prosledi kao podatak, ali ne mora, zato upitnik.
