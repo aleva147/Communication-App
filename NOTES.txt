@@ -351,3 +351,224 @@ Inicijalni Modal: (Modal za kreiranje sobe)
 
 - Na uploadthing sajtu odes na aplikaciju koju si napravio, Files, i tu mozes da pratis da li ispravno radi.
  
+
+
+
+=================================================================================================================================
+
+
+
+
+====================
+Kreiranje nove sobe:
+====================
+
+- npm i axios
+	Axios je biblioteka koja pojednostavljuje slanje http zahteva.
+- onSubmit f-ju u initial-modal.tsx promenis da salje podatke iz forme na /api/rooms, i da resetuje formu i prozor.
+
+
+- Napravis lib/current-profile.ts util koji dohvata profile. 
+
+
+- Napravis /api/rooms rutu, tj fajl u api/rooms/route.ts koji ce obradjivati POST zahtev za kreiranje nove sobe.
+  Za potrebe generisanja nasumicnog invite koda:
+	npm i uuid
+	npm i -D @types/uuid
+
+
+- Sa ovim uradjenim, kad kliknes na Create, room ce se napraviti (vidi se u Prisma Studio na localhost:5555)
+	ali ces otici na 404 error stranicu. Jer te (setup)/rout.tsx usmerava na /rooms/${room.id}, a ti jos nisi napravio takvu rutu.
+
+
+
+
+===================
+Navigation sidebar:
+===================
+
+- Napravis app/(main)/(routes)/rooms/[roomId]/page.tsx.
+- Napravis app/(main)/layout.tsx.
+
+- U components/navigation folderu ce ti biti sve komponente koje su sadrzaj tog gornjeg navbara (ukljucujuci sam navbar).
+	Napravis components/navigation/navigation-sidebar.tsx.
+	Napravis components/navigation/navigation-action.tsx.	// Dugme u cosku sa plusicem koje sluzi za kreiranje nove sobe
+	Napravis components/navigation/navigation-item.tsx.		// Soba u listi svih soba u navbaru
+	Napravis components/action-tooltip.tsx.					// Ispisivanje odredjenog teksta kad se haveruje preko neke druge komponente
+
+npx shadcn-ui@latest add tooltip      Ovo je kad hoverujes misem preko neceg okruzenog tooltip tagom da se pojavi tekst koji opisuje radnju.
+npx shadcn-ui@latest add separator    Ovo je linija na ekranu koju koristis da razdvojis nesto.
+npx shadcn-ui@latest add scroll-area 
+
+
+----------Dugme sa plusicem za pravljenje nove sobe------------
+- hooks pravis kad zelis neku logiku da iskoristis na vise mesta u kodu pa da ne bude dupliciranog koda.
+    Nije rec o modalu/komponenti, jer ova logika nece imati nikakav graficki prikaz, samo upravlja sa state-ovima i slicno.
+- Zustand je biblioteka koja olaksava upravljanje state-ovima
+	npm i zustand
+
+- Napravis communication-app/hooks/use-modal-store.ts.
+
+
+- Napravis components/modals/create-room-modal.tsx (najbolje prekopiras intial-modal.tsx pa izmenis sta treba).
+	Dakle ovo je ista stranica kao inicijalna, ali sada vraca modal za kreiranje sobe samo ako je kliknuto na dugme sa plusicem, a ne uvek.
+
+
+- Napravis components/providers/modal-provider.tsx.
+	Ovo ce vracati fragment (fragment je <> ... </>) koji renderuje sve modale.
+	Initial-modal je bio izuzetak, on se direktno renderuje, nezavisno, nije povezan sa zustandom i hooks. 
+	Svi ostali modali kontrolisu se sa onClicks, useEffects..
+
+	----------------------
+	"use client" - znaci da nije u pitanju react server component.
+		I react server components i use client components su deo server-side renderinga.
+		Ali use client znaci da se renderuje i na serverskoj strani I na klijentskoj strani. 
+		To uzrokuje hydration errors, kada se u jednom stanju renderuje na serverskoj strani, a u nekom drugom stranju na klijentskoj.
+		Zato pomocu isMounted kazemo da necemo da renderujemo na serverskoj strani nikakave modale, u redu je da ih samo klijent renderuje
+	----------------------
+
+
+- U app/layout.tsx dodas <ModalProvider />
+
+- U components/navigation/navigation-action.tsx dodas onClick dugmetu da prikazuje ovaj modal.
+--------------------------------------------------------------
+
+
+
+
+=============
+Room sidebar: (prikazuje sve kanale i membere izabrane sobe)
+=============
+
+- Napravis  (main)/(routes)/rooms/[roomId]/layout.tsx  koji ce iz url putanje vaditi id tekuce sobe i prikazivati njen sadrzaj.
+
+
+- U components/room folderu su ti sve komponente koje ce biti sadrzaj izabrane sobe.
+	Napravis components/room/room-sidebar.tsx.
+	Napravis components/room/room-header.tsx.
+
+
+- Napravis communication-app/types.ts.
+	Ovo ti je potrebno jer si u room-sidebaru iz baze dovukao u objekat Room Model i jos dodatno u njega stavio channels i members.
+	Pa kad ti zatreba u room-header objekat koji ima Room Model plus Members, nemas kako da ga prosledis.
+
+
+
+
+============
+Invitations:
+============
+
+- U hooks/use-modal-store.ts prosiris ModalType, dodas ModalData. 
+
+- U room-header dodas  const {onOpen} = useModal();  i onClick metod na svaki od DropdownItema koji poziva onOpen i prosledjuje room kao data.
+	Pritom je onOpen("invite", { room }) skraceno za onOpen("invite", { room: room}).
+
+
+- Napravis hooks/use-origin.ts  za citanje url-a.
+
+
+- Napravis components/modals/invite-modal.tsx (najbolje pejstujes create-room-modal pa izmenis).
+- Dodas <InviteModal /> u modal-provider.tsx.	
+
+- Prosiris invite-modal.tsx sa onNew,...
+	Da ne bi dobio error kad kliknes na generisanje novog linka, treba da napravis  api/rooms/[roomId]/invite-code/route.ts.
+	Ovo je samo obrada update zahteva, generise random invite-code i upisuje u odgovarajuce polje objekta sobe u bazi.
+	Patch je update zahtev, ne pise se Update u axiosu (kao sto imas get,post,update,delete)
+
+
+- Sad treba da napravimo da taj generisani link stvarno odvede do sobe kad se iskoristi.
+	Napravis app/(invite)/(routes)/invite/[inviteCode]/page.tsx.
+	
+
+-------------------
+Ako nesto pogresis u bazi ili je samo prosiris, treba obrisati postojecu bazu zbog kompatibilnosti:
+  npx prisma migrate reset
+  npx prisma generate
+  npx prisma db push
+--------------------
+	
+
+
+
+==============
+Room Settings:
+==============
+
+- U use-modal-store.ts dodas kao type i "editRoom". Ostalo sve vec ima.
+
+- Napravis components/modals/edit-room-modal.tsx.
+
+- Dodas u components/providers/modal-provider.tsx  <EditRoomModal />
+
+- Dodas onClick za dugme za room settings u room-header.tsx.
+
+- Napravis app/api/rooms/[roomId]/route.ts
+	Jer si u edit-room-modal.tsx koristio  axios.patch(`/api/rooms/${room?.id}`, values);  u onSubmit.
+
+
+
+
+
+===============
+Manage Members:
+===============
+
+- U use-modal-store.ts dodas kao tip i "members". Ostalo sve vec ima.
+
+- Napravis components/modals/members-modal.tsx.
+	Trebace ti npm i query-string. Ovo je za radnje nad url, cepkanje na delove i slicno.
+
+- Dodas u components/providers/modal-provider.tsx  <MembersModal />
+
+- Dodas onClick za dugme za manage members u room-header.tsx.
+
+- Napravis components/user-avatar.tsx
+  npx shadcn-ui@latest add avatar
+
+
+- Nakon ovoga, error kad kliknes da promenis rang na guest ili moderator jer jos ne postoje te rute.
+  Napravis app/api/members/[memberId]/route.ts.
+
+------------
+Cak i kad ne renderujes neku opciju na frontu (ne prikazujes Kick opciju za admina npr) treba to da sprecis i na beku 
+(da ne dohvatas iz baze admina npr) jer front moze lako da se zaobidje ako neko to hoce.
+------------
+
+
+
+
+=================
+Channel Creation:
+=================
+
+- U use-modal-store.ts dodas kao tip i "createChannel". Ostalo sve vec ima.
+
+- Napravis components/modals/create-channel-modal.tsx.
+
+- Dodas u components/providers/modal-provider.tsx  <CreateChannelModal />
+
+- Dodas onClick za dugme za channel creation u room-header.tsx.
+
+npx shadcn-ui@latest add select
+
+- Napravis app/api/channels/route.ts za obradu zahteva za kreiranjem sobe da te create dugme ne bi odvelo na 404 not found error.
+
+
+
+
+======================
+Delete and Leave Room:
+======================
+
+U use-modal-store.ts dodas kao tip i "leaveRoom" i "deleteRoom". Ostalo sve vec ima.
+
+Napravis components/modals/leave-room-modal.tsx i delete-room-modal.
+
+Dodas u components/providers/modal-provider.tsx  <LeaveRoomModal /> i <DeleteRoomModal />
+
+Dodas onClick za dugme za leave room i delete room u room-header.tsx.
+
+Napravis app/api/rooms/[roomId]/leave/route.ts za leave funkcionalnost.
+Prosiris app/api/rooms/[roomId]/route.ts za delete funkcionalnost.
+

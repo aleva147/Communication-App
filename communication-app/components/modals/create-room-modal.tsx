@@ -2,7 +2,7 @@
 
 
 import { useForm } from "react-hook-form";
-import { useEffect, useState } from "react";
+import { useModal } from "@/hooks/use-modal-store";
 import { useRouter } from "next/navigation";
 
 // Shadcn:
@@ -21,7 +21,6 @@ import axios from "axios";
 
 
 
-
 const formSchema = z.object({
     name: z.string().min(1, {
       message: "Room name is required."
@@ -32,49 +31,49 @@ const formSchema = z.object({
 });
 
 
-export const InitialModal = () => {
-    const router = useRouter();
+export const CreateRoomModal = () => {
+    const { type, isOpen, onClose } = useModal();
+    const isModalOpen = isOpen && type === "createRoom";
 
-    // Da sprecimo hydration errors:
-    const [isMounted, setIsMounted] = useState(false);
-    useEffect(() => {
-        setIsMounted(true);
-    }, []);
+    const router = useRouter();
 
 
     // Form format:
     const form = useForm({
         resolver: zodResolver(formSchema),
         defaultValues: {
-        name: "",
-        imageUrl: "",
+            name: "",
+            imageUrl: "",
         }
     });
 
+    
     const isLoading = form.formState.isSubmitting;
 
     const onSubmit = async (values: z.infer<typeof formSchema>) => {
         try {
-            await axios.post("/api/rooms", values); // U api/rooms se nalazi .ts fajl koji obradjuje POST zahtev za kreiranje nove sobe. 
-                                                    //   Jedan fajl obradjuje jedan zahtev, pa nije bitno odakle je upucen zahtev, obrada je ista.
+            await axios.post("/api/rooms", values);
+
             form.reset();
             router.refresh();
-            window.location.reload();
+            onClose();
         } catch (error) {
             console.log(error);
         }
     }
 
-    if (!isMounted) {
-        return null;
+    const handleClose = () => {
+        form.reset();
+        onClose();
     }
 
+
     return (
-        <Dialog open>
+        <Dialog open={isModalOpen} onOpenChange={handleClose}>
             <DialogContent className="bg-white text-black p-0 overflow-hidden">
                 <DialogHeader className="pt-8 px-6">
                     <DialogTitle className="text-2xl text-center font-bold">
-                        Create a Room
+                        Customize your room
                     </DialogTitle>
                     <DialogDescription className="text-center text-zinc-500">
                         Give your room a personality with a name and an image. <br/> (you can always change this later)
