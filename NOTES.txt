@@ -1,0 +1,353 @@
+====================
+Pravljenje projekta:
+====================
+
+-------------
+npx create-next-app@latest communication-app --typescript --tailwind --eslint
+-------------
+
+- create-next-app@latest  je sintaksa za pravljenje next.js aplikacije koristeci najnoviju verziju next.js-a.
+- communication-app  je proizvoljan naziv koji dodeljujes aplikaciji.
+- ostatak su dodatni flagovi
+	typescript je nadskup javascripta sa statickom dodelom tipova kako bi se greske nalazile pri kompajliranju, a ne pri izvrsavanju.
+	tailwind je css framework poput bootstrapa.
+	eslint sluzi za pronalazenje sintaksnih/semantickih gresaka i/ili formatiranje javascript koda koji pises.
+
+- yes za opciju "Would you like to use App Router", i vec izabrano za sve ostale.
+
+-------------
+npm run dev     za pokretanje na localhost:3000
+-------------
+
+
+
+
+=====================================
+Sredjivanje polaznog stanja projekta:
+=====================================
+
+----------------------------------------------------
+- U globals.css dopises pravilo za html, body i root
+html, body, :root { height: 100%; } 
+
+Bez ovoga sadrzaj koji pravis/koristis nece koristiti 100% ekrana bez obzira sto ces u komponentama
+	govoriti koliki height zelis... Neophodno je.
+----------------------------------------------------
+
+- Po defaultu, page.tsx se rutira na localhost:3000. 
+- U page.tsx obrises sve unutar return f-je (page.tsx je ono sto se prikazuje na stranici, ne treba ti ova njihova default stranica)
+
+
+<p className='text-3xl font-bold text-indigo-500'>  
+      Hello...
+</p>
+
+- Ovo className='...' je Tailwind. Instaliraj ekstenziju za Tailwind u VS Code-u, pa ces imati autocomplete i
+	kad hoverujes misom preko neceg sto korstis u className prikazace ti kako je to sto koristis napisano u obicnom CSS-u.
+
+
+- Font mozes menjati u layout.tsx (po defaultu je Inter).
+- U istom tom fajlu menjas i Title stranice. 
+
+
+- Instaliraj Simple React Snippets ekstenziju za brze kucanje.
+
+- Ako napravis novi folder 'test' unutar app foldera i u njemu takodje page.tsx
+  
+  Skraceno kucanje 'sfc' tab za:
+	const TestPage = () => {
+	  return (
+		<div>Test Page!</div>
+	  );
+	}
+	export default TestPage;
+
+  Polazna stranica ti je i dalje ista, ali ako na url dopises i /test, stici ces do ove nove stranice.
+
+- Ako zelis da napravis novi folder koji ne utice na url, onda je u pitanju organizacioni folder.
+  Organizacioni folderi se imenuju sa () i nazivom izmedju.
+  Unutar organizacionog foldera onda mozes da pravis obicne foldere za stranice i jedan layout.tsx fajl u kome ces definisati svojstva za
+	sve stranice unutar ovog organizacionog foldera.
+
+
+- Premesti page.tsx u (main)/routes.
+
+
+
+
+=====================
+Shadcn/ui biblioteka:
+=====================
+
+-------------
+- pozicioniraj se u communication-app folder koji je napravljen ovom komandom.
+npx shadcn-ui@latest init
+-------------
+- Ovo je podrska za shadcn biblioteku (unapred napravljen lep UI koji mozes da koristis)
+- Dakle shadcn-ui je kao na bootstrapovom sajtu sto imas vec napravljen UI spreman za koriscenje,
+    a tailwind je kao u bootstrapu sto imas vec napravljene css klase koje mozes da koristis kad pises kod.
+	
+- Sve vec izabrane stavke (baseColor mozes menjati u components.json kasnije).
+
+- Posto si u onoj prvoj komandnoj naredbi rekao yes za "Would you like to use App Router"
+	onda si i ovde rekao yes za "Are you using React Server Components?"
+
+- Rezultat ove druge komandne naredbe je components.json fajl.
+	Takodje i lib\utils.ts fajl. Njegova cn f-ja ce se koristiti unutar shadcn ui komponenti koje budes uvozio, a mozes je i ti van njih koristiti.
+	Njoj prosledjujes vise parametara i ako se vise njih odnosi na istu stvar, 
+	poslednji medju njima koji nije false/nula ce biti onaj koji ce se primeniti (nadjacace prethodne).
+	Koristi se npr za dinamicko dodeljivanje klasa (u zavisnosti od ispunjenosti nekog uslova razlicita klasa ce biti dodeljena).
+
+	- Primer rucnog koriscenja cn util f-je:
+	<Button className={cn("bg-blue-500", state && "bg-red-500")}>    <!-- state je neka tvoja promenljiva -->
+	   ButtonText
+	</Button>
+
+- Kad hoces da uvezes neku komponentu iz shadcn biblioteke, najbolje preko konzole (otvori jos jedan terminal na plusic u VS Code-u).
+	Ne zaboravi da se pozicioniras unutar communication-app foldera.
+	Komanda ce pogledati tvoj components.json fajl da vidi koje si opcije izabrao za ovaj projekat i prilagoditi komponentu tome.
+	
+	Na shadcn ui sajtu mozes za svaku komponentu naci cmd naredbu za dodavanje komponente u projekat. Za dugme je:
+		npx shadcn-ui@latest add button
+
+	U terminalu ukucas 'exit' da ugasis ovaj terminal jer ti vise ne treba.
+	
+- Rezultat je napravljen folder components\ui i u njemu button.tsx fajl. Ovo je kompletan kod koriscen za dugme. 
+	Mozes da promenis sta god pozelis unutar, to je sada kao da si ga ti napisao od nule.
+	Mozes i da dodajes ovde nove varijante ako zelis jos neku boju..
+
+- Sada uvezeno dugme koristis kao vec gotovu komponentu:
+	<Button variant="outline">ButtonText</Button>
+  Pri cemu se radi uvoz:
+    import { Button } from "@/components/ui/button"
+
+
+
+
+==============
+Autentikacija: (Clerk.com)
+==============
+
+U .gitignore dopises .env kod local env files.
+Pravimo nas .env fajl, jer cemo postojeci .env.local koristiti u neke druge svrhe.
+
+
+clerk.com - nudi ti unapred napravljenu autentikaciju za email, google, fb..... koje mozes da iskoristis u svojoj next.js aplikaciji.
+	Treba da napravis .env fajl u communication-app folderu. U njega prekopiras dva reda sa clerk.com (javni i privatni kljuc).
+
+	Onda na clerk.com kliknes continue in docx i pratis dalje uputstva.
+	2. korak preskocis jer si to vec uradio.
+	4. korak moras ti da napravis taj novi fajl u communication-app folderu i nazoves ga middleware.ts
+	5. korak napravis (auth)/(routes)/sign-up/[[...sign-up]]  
+		Ova poslednja dva foldera moraju tako da se zovu po da bi ih po defaultu clerk prepoznao. 
+		Konvencija [[...ime]] znaci da ce se nesto odnositi na stranicu u tekucem folderu, kao i svim stranicama u podfolderima.
+	6. korak u istom onom .env fajlu sad pejstujes jos ova 4 reda.
+		Ovim redovima ti je definisana ocekivana putanja do fajlova iz 5. koraka. 
+		Ako zelis da se oni folderi ne zovu sign-in i sign-up, to ovde promenis u prva dva od 4 prekopirana reda, 
+		pa i tim folderima promenis nazive (promenis i kod onog [[...noviNaziv]]). 
+		Poslednja dva prekopirana reda su putanje do tih foldera u odnosu na app folder, pa mozes i to da promenis ako hoces.
+
+
+- Zelimo da centriramo clerk-ov panel za login/registraciju:
+  U app/(auth)/layout.tsx:
+	<div className="h-full flex items-center justify-center">
+	  {children}
+	</div>
+
+
+- Tvoja stranica u (main)/(routes)/page.tsx je zasticena stranica, clerk sprecava da neulogovan korisnik moze njoj da pristupi unoseci njen url, 
+  vec ce biti redirektovan na sign-in stranicu (clerk zna koje stranice su sign-in i sign-up na osnovu naziva i putanja u .env fajlu).
+  
+  Jednom kad se korisnik uloguje, clerk ce ga preusmeriti na tvoju pocetnu stranicu (main)/(routes)/page.tsx.
+
+
+- Dodas UserButton u (main)/(routes)/page.tsx. Sad ce ulogovan korisnik imati onu profilnu u cosku sa opcijama za nalog.
+
+
+
+
+=====
+Teme:
+=====
+
+npm i next-themes
+
+Onda na shadcn dokumentaciji odes na "Dark mode", izaberes next.js framework.
+	1. Novi folder u components, nazoves "providers", u njemu theme-provider.tsx, i pejstujes kod sa dokumentacije.
+	2. U app/layout.tsx UNUTAR body bloka okruzis {children} sa
+		<ThemeProvider attribute="class" defaultTheme="dark" enableSystem={false} storageKey="discord-theme">...</ThemeProvider>
+	   Pritom pazis odakle uvozis ThemeProvider.
+	   enableSystem omogucava funkcionalnu opciju System koja ce postaviti theme na koji god je system default. Ako ovo stavis na false,
+	        biranje ove opcije nista nece promeniti. Ako stavis ovo na true, onda nemoj da nameces neki theme kao polazni.
+
+	   U html tagu dopises suppressHydrationWarning
+
+	   U body tagu prepravis className={cn(font.className, "bg-white dark:bg-[#313338]")}
+		pritom uvezes cn f-ju. Ovim ce pozadina biti bela kad nije dark theme izabran, 
+		a tamno siva kad jeste (umesto skroz crna kao sto bi bilo da ovo nisi uradio).
+	3. Unutar components foldera novi fajl "mode-toggle.tsx". Pejstujes u njega kod sa sajta.
+	   Moras da uvezes shadcn dropdown menu komponentu (odes u shadcn dokumentaciju za dropdown menu i onu jednu konzolnu naredbu iskoristis)
+	4. U (main)/(routes)/page.tsx iskoristis <ModeToggle /> na stranici.
+
+
+
+
+=============
+Server setup: (pravljenje MySQL baze i Prisma za rad sa njom)
+=============
+
+- Prisma ti je za pristup i rad sa bazom (ono sto je bio express u MEAN steku):
+
+	npm i -D prisma
+	npx prisma init
+
+	- Rezultat je formiranje Prisma foldera i dodatne stvari u .env fajlu.
+	
+	
+- Bazu neces napraviti lokalno na kompu, jer bi onda bila pristupacna samo kad ti je upaljen komp (i na njemu mysql),
+  nego koristis neki sajt koji pruza uslugu da na njihovom serveru drzis sve vreme aktivnu bazu:
+  
+	Odes na Aiven.io i izaberes MySQL
+	Napravis besplatnu bazu 
+	
+	Prekopiras dobijeni URL u .env kao DATABASE_URL
+	Uradis one dve komande koje se radi svaki put nakon menjanja prisma scheme
+
+	Promenis polazni schema.prisma fajl da koristi mysql
+	Uradis dole navedene dve naredbe u konzoli koje se rade svaki put kad promenis nesto u schemi.
+
+
+U schemi napises modele za Profile, Room
+	@db.Text znaci da ovaj string moze imati vise karaktera nego sto bi inace bilo podrazumevano. Pa to koristimo za imageUrl i email.
+
+	Da bi uspostavio vezu izmedju modela Profile i Room:
+		u Profile modelu moras dodati polje tipa niza Servera,
+		u Room Modelu polje tipa Profile sa relacijom. 
+		U relaciji fields su polja ovog modela (modela Servera) u kojima ce se cuvati vrednosti polja iz Profile modela navedenih u references. 
+		A onDelete:Cascade znaci da kad se obrise roditelj, brisu se i deca
+		(znaci valjda ako se obrise taj profil, obrisace se i ova polja u Room modelu, ili obrnuto?).
+
+	U serveru dodajes i @@index([profileId]) kako bi ti nestao warning o neefikasnosti baze po pitanju relacije i dohvatanja....
+
+Potom model za Memeber i njegovu relaciju sa Profile modelom i Room modelom.
+Potom model za Channel i njegovu relaciju sa Profile i Room
+
+
+---------------------------------------------------------------------------------
+Svaki put kad promenis nesto u schemi, moras ove dve komande u konzoli da ukucas:
+
+npx prisma generate		ovo dodaje azuriranu verziju scheme u node modules
+npx prisma db push		ovo stavlja tu verziju scheme na PlanetScale
+---------------------------------------------------------------------------------
+
+-------------------------
+Pravljenje Database util:
+
+npm i @prisma/client
+
+Napravis db.ts fajl u lib folderu i u njemu ispises:
+
+	import { PrismaClient } from "@prisma/client"
+
+	declare global {
+		var prisma: PrismaClient | undefined;
+	}
+
+	export const db = globalThis.prisma || new PrismaClient();
+
+	if (process.env.NODE_ENV !== "production") globalThis.prisma = db
+
+
+Ovako ce ti izgledati util samo tokom programiranja, kad budes pustio finalnu verziju, tad ces obrisati ovo globalThis.prisma,
+	bice ti samo db = new PrismaClient(). Tokom programiranja, globalThis.prisma te stiti od pravljenja previse klijenata pri
+	hotReload, tj obezbedjuje da se nece praviti novi klijent svaki put kad promenis neku liniju koda i sacuvas.
+-------------------------
+
+
+
+
+==========================
+Sredjivanje polazne tacke:
+==========================
+
+Pravimo da kad neko dodje na pocetnu stranicu:
+	- Ako nije ulogovan, saljemo ga na login
+	- Ako jeste, dohvatamo njegov Profile Model iz baze, ili pravimo novi Profile Model na osnovu podataka sa kojima se upravo registrovao.
+		Vracamo ovaj Profile Model kao rezultat f-je.
+
+Napravi inital-profile.ts u lib folderu koji ce ovo raditi. 
+
+
+Obrisi (main) folder.
+Umesto njega napravi (setup) folder i u njemu page.tsx kao sveukupnu polaznu tacku. Obavezno da bude async jer treba da ceka na initalProfile() f-ju.
+
+-----(setup)/page.tsx-----
+import { redirect } from "next/navigation";
+import { db } from "@/lib/db";
+import { initialProfile } from "@/lib/initial-profile";
+
+
+
+const SetupPage = async () => {
+    const profile = await initialProfile();
+
+    // Radimo pretragu nad svim sobama i vracamo prvu na koju naidjemo da je ulogovan korisnik njen member
+    const room = await db.room.findFirst({
+        where: {
+            members: {
+                some: {
+                    profileId: profile.id
+                }
+            }
+        }
+    })
+
+    // Prikazujemo stranicu te sobe ako smo nasli bar jednu sobu kojoj pripada korisnik
+    if (room) {
+        return redirect(`/rooms/${room.id}`);
+    }
+
+    // Ako ulogovan korisnik nije pripadao nijednoj sobi, prikazujemo stranicu za kreiranje sobe (to je ista ova tekuca stranica, samo sada sa Modalom za kreiranje sobe)
+    return <div>Create a Room</div>
+}
+
+export default SetupPage;
+---------------------------
+
+----Testiranje rada baze----
+Otvoris jos jedan terminal, npx prisma studio.
+Odes na localhost:5555
+----------------------------
+
+
+
+
+=================
+Inicijalni Modal: (Modal za kreiranje sobe)
+=================
+
+- Sa shadcn uvezes Dialog, Input, Form.
+
+- Novi folder u components koji zoves 'modals'. U njemu initial-modal.tsx.
+  U (setup)/page.tsx radis return <InitialModal /> kad nije nadjen nijedna soba.
+
+- Zod je biblioteka za validaciju sema u typescriptu (mi cemo koristiti za validaciju formata forme koju korisnik popunjava).
+
+
+- Uploadthing.com (za upload slika), napravis nalog, new app, pejstujes dve linije u .env.
+  Odes na overview, Get Started, Getting Started i pratis dokumentaciju.
+  Izmenis valjano core.ts jer oni tu nisu znali sta ti tacno koristis (clerk...)
+    3. ne treba
+	4. mi cemo u lib folder to staviti.
+
+- U middleware.ts dodas /api/uploadthing u publicRoutes za svaki slucaj.
+
+- U components napravis file-upload.tsx.
+
+- U next.config.js dodas "utfs.io" kao domen za slike.
+
+- U initial-modal.tsx dopises kod za upload slike.
+
+
+- Na uploadthing sajtu odes na aplikaciju koju si napravio, Files, i tu mozes da pratis da li ispravno radi.
+ 
