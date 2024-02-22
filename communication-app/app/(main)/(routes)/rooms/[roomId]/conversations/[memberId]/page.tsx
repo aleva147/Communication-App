@@ -6,9 +6,9 @@ import { getOrCreateConversation } from "@/lib/conversation";
 import { currentProfile } from "@/lib/current-profile";
 
 import { ChatHeader } from "@/components/chat/chat-header";
-// import { ChatMessages } from "@/components/chat/chat-messages";
-// import { ChatInput } from "@/components/chat/chat-input";
-// import { MediaRoom } from "@/components/media-room";
+import { ChatMessages } from "@/components/chat/chat-messages";
+import { ChatInput } from "@/components/chat/chat-input";
+import { MediaRoom } from "@/components/media-room";
 
 
 interface MemberIdPageProps {
@@ -67,14 +67,14 @@ const MemberIdPage = async ({
         roomId={params.roomId}
         type="conversation"
       />
-      {/* {searchParams.video && (
+      {searchParams.video && (
         <MediaRoom
           chatId={conversation.id}
           video={true}
           audio={true}
         />
-      )} */}
-      {/* {!searchParams.video && (
+      )}
+      {!searchParams.video && (
         <>
           <ChatMessages
             member={currentMember}
@@ -98,7 +98,7 @@ const MemberIdPage = async ({
             }}
           />
         </>
-      )} */}
+      )}
     </div>
    );
 }

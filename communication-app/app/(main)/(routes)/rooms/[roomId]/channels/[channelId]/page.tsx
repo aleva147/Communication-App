@@ -8,7 +8,7 @@ import { currentProfile } from "@/lib/current-profile";
 import { ChatHeader } from "@/components/chat/chat-header";
 import { ChatInput } from "@/components/chat/chat-input";
 import { ChatMessages } from "@/components/chat/chat-messages";
-// import { MediaRoom } from "@/components/media-room";
+import { MediaRoom } from "@/components/media-room";
 
 
 // Znas da ces imati roomId i channelId unutar url zbog putanje do ovog fajla ([roomId], [channelId])
@@ -85,7 +85,7 @@ const ChannelIdPage = async ({
           />
         </>
       )}
-      {/* {channel.type === ChannelType.AUDIO && (
+      {channel.type === ChannelType.AUDIO && (
         <MediaRoom
           chatId={channel.id}
           video={false}
@@ -98,7 +98,7 @@ const ChannelIdPage = async ({
           video={true}
           audio={true}
         />
-      )} */}
+      )}
     </div>
    );
 }

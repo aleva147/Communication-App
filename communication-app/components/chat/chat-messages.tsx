@@ -1,8 +1,8 @@
 "use client";
 
 import { useChatQuery } from "@/hooks/use-chat-query";
-// import { useChatSocket } from "@/hooks/use-chat-socket";
-// import { useChatScroll } from "@/hooks/use-chat-scroll";
+import { useChatSocket } from "@/hooks/use-chat-socket";
+import { useChatScroll } from "@/hooks/use-chat-scroll";
 import { Fragment, useRef, ElementRef } from "react";
 
 import { Member, Message, Profile } from "@prisma/client";
@@ -48,12 +48,14 @@ export const ChatMessages = ({
   paramValue,
   type,
 }: ChatMessagesProps) => {
+  // Za azuriranje poruka u realnom vremenu
   const queryKey = `chat:${chatId}`;
-  // const addKey = `chat:${chatId}:messages`;
-  // const updateKey = `chat:${chatId}:messages:update` 
+  const addKey = `chat:${chatId}:messages`;
+  const updateKey = `chat:${chatId}:messages:update` 
 
-  // const chatRef = useRef<ElementRef<"div">>(null);
-  // const bottomRef = useRef<ElementRef<"div">>(null);
+  // Za ucitavanje starih poruka pri skrolovanje navise umesto da odmah prikazemo sve
+  const chatRef = useRef<ElementRef<"div">>(null);
+  const bottomRef = useRef<ElementRef<"div">>(null);
 
   const {
     data,
@@ -67,16 +69,19 @@ export const ChatMessages = ({
     paramKey,
     paramValue,
   });
-  // useChatSocket({ queryKey, addKey, updateKey });
-  // useChatScroll({
-  //   chatRef,
-  //   bottomRef,
-  //   loadMore: fetchNextPage,
-  //   shouldLoadMore: !isFetchingNextPage && !!hasNextPage,
-  //   count: data?.pages?.[0]?.items?.length ?? 0,
-  // })
+  // Za azuriranje poruka u realnom vremenu
+  useChatSocket({ queryKey, addKey, updateKey });
+  // Za ucitavanje starih poruka pri skrolovanje navise umesto da odmah prikazemo sve
+  useChatScroll({
+    chatRef,
+    bottomRef,
+    loadMore: fetchNextPage,
+    shouldLoadMore: !isFetchingNextPage && !!hasNextPage,
+    count: data?.pages?.[0]?.items?.length ?? 0,
+  })
 
 
+  // Pri osvezavanju stranice dok se dohvate poruke iz baze:
   if (status === "loading") {
     return (
       <div className="flex flex-col flex-1 justify-center items-center">
@@ -87,7 +92,7 @@ export const ChatMessages = ({
       </div>
     )
   }
-
+  // Ako pukne konekcija npr.
   if (status === "error") {
     return (
       <div className="flex flex-col flex-1 justify-center items-center">
@@ -101,19 +106,19 @@ export const ChatMessages = ({
 
 
   return (
-    // <div ref={chatRef} className="flex-1 flex flex-col py-4 overflow-y-auto">
-    <div className="flex-1 flex flex-col py-4 overflow-y-auto">
+    <div ref={chatRef} className="flex-1 flex flex-col py-4 overflow-y-auto">
+
       <div className="flex-1" />
-      {/* !hasNextPage nam je oznaka da smo skrolovali poruke do vrha, tada zelimo da prikazemo ovo inicijalno Welcome to channel ili sta vec */}
-      {/* {!hasNextPage && <div className="flex-1" />}
-      {!hasNextPage && ( */}
+      {/* !hasNextPage nam je oznaka da smo skrolovali poruke do vrha (tj da nema vise starih poruka za ucitavanje), tada prikazujemo inicijalno Welcome to channel*/}
+      {!hasNextPage && <div className="flex-1" />}
+      {!hasNextPage && (
         <ChatWelcome
           type={type}
           name={name}
         />
-      {/* )} */}
+      )}
 
-      {/* {hasNextPage && (
+      {hasNextPage && (
         <div className="flex justify-center">
           {isFetchingNextPage ? (
             <Loader2 className="h-6 w-6 text-zinc-500 animate-spin my-4" />
@@ -126,15 +131,12 @@ export const ChatMessages = ({
             </button>
           )}
         </div>
-      )} */}
+      )}
 
       <div className="flex flex-col-reverse mt-auto">
         {data?.pages?.map((group, i) => (
           <Fragment key={i}>
             {group.items.map((message: MessageWithMemberWithProfile) => (
-              // <div key={message.id}>
-              //   {message.content}
-              // </div>
               <ChatItem
                 key={message.id}
                 id={message.id}
@@ -152,7 +154,8 @@ export const ChatMessages = ({
           </Fragment>
         ))}
       </div>
-      {/* <div ref={bottomRef} /> */}
+
+      <div ref={bottomRef} />
     </div>
   )
 }

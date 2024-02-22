@@ -329,7 +329,7 @@ Inicijalni Modal: (Modal za kreiranje sobe)
 - Sa shadcn uvezes Dialog, Input, Form.
 
 - Novi folder u components koji zoves 'modals'. U njemu initial-modal.tsx.
-  U (setup)/page.tsx radis return <InitialModal /> kad nije nadjen nijedan server.
+  U (setup)/page.tsx radis return <InitialModal /> kad nije nadjen nijedna soba.
 
 - Zod je biblioteka za validaciju sema u typescriptu (mi cemo koristiti za validaciju formata forme koju korisnik popunjava).
 
@@ -403,7 +403,9 @@ npx shadcn-ui@latest add scroll-area
 
 ----------Dugme sa plusicem za pravljenje nove sobe------------
 - hooks pravis kad zelis neku logiku da iskoristis na vise mesta u kodu pa da ne bude dupliciranog koda.
-    Nije rec o modalu/komponenti, jer ova logika nece imati nikakav graficki prikaz, samo upravlja sa state-ovima i slicno.
+    Nije rec o modalu/komponenti, jer ova logika nece imati nikakav graficki prikaz,
+	niti je rec o obicnim typescript f-jama (fajlove u lib koristis u te svrhe), 
+	nego o logici za upravljanje sa state-ovima i slicno.
 - Zustand je biblioteka koja olaksava upravljanje state-ovima
 	npm i zustand
 
@@ -477,7 +479,7 @@ Invitations:
 	Patch je update zahtev, ne pise se Update u axiosu (kao sto imas get,post,update,delete)
 
 
-- Sad treba da napravimo da taj generisani link stvarno odvede do servera kad se iskoristi.
+- Sad treba da napravimo da taj generisani link stvarno odvede do sobe kad se iskoristi.
 	Napravis app/(invite)/(routes)/invite/[inviteCode]/page.tsx.
 	
 
@@ -521,7 +523,7 @@ Manage Members:
 
 - Dodas u components/providers/modal-provider.tsx  <MembersModal />
 
-- Dodas onClick za dugme za manage members u server-header.tsx.
+- Dodas onClick za dugme za manage members u room-header.tsx.
 
 - Napravis components/user-avatar.tsx
   npx shadcn-ui@latest add avatar
@@ -548,11 +550,11 @@ Channel Creation:
 
 - Dodas u components/providers/modal-provider.tsx  <CreateChannelModal />
 
-- Dodas onClick za dugme za channel creation u server-header.tsx.
+- Dodas onClick za dugme za channel creation u room-header.tsx.
 
 npx shadcn-ui@latest add select
 
-- Napravis app/api/channels/route.ts za obradu zahteva za kreiranjem servera da te create dugme ne bi odvelo na 404 not found error.
+- Napravis app/api/channels/route.ts za obradu zahteva za kreiranjem sobe da te create dugme ne bi odvelo na 404 not found error.
 
 
 
@@ -631,9 +633,9 @@ Channel ID Page:
 
 - Napravis app/api/channels/[channelId]/route.ts.
 
-- Napravis (main)/(routes)/rooms/[roomId]/channels/[channelId]/page.tsx (tu se stize kad se klikne na neki od kanala unutar servera)
+- Napravis (main)/(routes)/rooms/[roomId]/channels/[channelId]/page.tsx (tu se stize kad se klikne na neki od kanala unutar sobe)
 
-- Napravis (main)/(routes)/rooms/[roomId]/conversations/[memberId]/page.tsx (tu se stize kad se klikne na nekog membera unutar servera)
+- Napravis (main)/(routes)/rooms/[roomId]/conversations/[memberId]/page.tsx (tu se stize kad se klikne na nekog membera unutar sobe)
 
 - Promenis (main)/(rotues)/rooms/[roomId]/page.tsx da prikazuje general channel, a ne nijedan.
 
@@ -815,3 +817,116 @@ Delete Message:
 - Prosiris components/providers/modal-provider.tsx.
 
 - Prosiris chat-item.
+
+
+
+
+============================================================================================================
+
+
+
+
+=================
+Chat Socket hook: (real-time reakcija na slanje, editovanje i brisanje poruka. Dosad je morao refresh)
+=================
+
+- Napravis hooks/use-chat-socket.ts
+- Prosiris components/chat/chat-messages sa ChatSocket stvarima.
+
+
+
+
+=================
+Chat Scroll hook: (kad skrolujes nagore da se ucitavaju stare poruke umesto da odjednom prikazes sve)
+=================
+
+- Napravis hooks/use-chat-scroll
+- Prosiris components/chat/chat-messages.tsx
+
+
+
+
+================
+Direct Messages:
+================
+
+- Prosiris app/main/routes/rooms/[roomId]/conversations/[memberId]/page.tsx
+
+- Napravis app/api/direct-messages/route.ts
+
+- Napravis pages/api/socket/direct-messages/index.ts i [directMessageId].ts
+
+
+
+
+============
+Video Calls:  (livekit.io/cloud)
+============
+
+- Napravis aplikaciju na livekit.io/cloud
+- Prosiris .env fajl sa NEXT_PUBLIC_LIVEKIT_URL koji ti je na vrhu pocetne strane kad napravis aplikaciju na livekit.
+                   sa LIVEKIT_API_KEY i SECRET koji dobijes odlaskom u settings na sajtu i create new key.
+- Pratis livekit dokumentaciju sa njihovog sajta za next.js 13.
+	3. Napravis app/api/livekit/route.ts i tu prekopiras.
+	Ostale korake nije pratio.
+
+
+- Napravis components/media-room.tsx
+- Prosiris (main)/(routes)/rooms/[roomId]/channels/[channelId]/page.tsx
+
+
+- Napravis components/chat/chat-video-button.tsx
+- Prosiris components/chat/chat-header.tsx
+
+- Prosiris (main)/(routes)/rooms/[roomId]/conversations/[memberId]/page.tsx sa searchParams
+
+
+
+===========
+Deployment:
+===========
+
+git add .
+git commit -m "final"
+
+Na githubu create a new reposirtory, private
+
+Iskoristis drugu opciju (ne create a new repository on the command line, nego push an existing..)
+	To u konzoli iskoristis.
+
+Railway.app (ne mozemo versal jer je versal serverlazed, a mi koristimo sockete pa socketi tamo ne bi radili)
+	Free trial, create new project, deploy from github repo, izaberes onaj koji si napravio, add variables, raw editor tu pejstujes sve iz .env fajla, update variables
+	U deployments ce se nakon nekog vremena buildovati, onda kliknes na to sto je buildovano, add a domain, kopiras taj url (nakon nekog vremena ce biti i aktivan)
+		odes nazad u variables, u raw editor dodas jos i NEXT_PUBLIC_SITE_URL=tajUrl. Sacekas da se builduje iznova i tjt.  
+
+
+
+
+
+=================================================================================================================================
+=================================================================================================================================
+=================================================================================================================================
+Rezimiranje:
+- components/modals: mali popup prozorcici koji se prikazuju na postojecem stanju stranice.
+- components/ui: kod za sve komponente uvezene iz shadcn
+- components/providers: koristili smo ih samo u app/layout.tsx
+- ostali folderi u components su ti samo za grupisanje komponenti u smislene celine radi lakseg snalazenja.
+- fajlovi u components folderu koji nisu ni u jednom folderu su komponente kao i bilo koje druge, 
+  samo su se ili koristile na vise razlicitih mesta, ili bi stajale same u jednom folderu.
+
+- Zod je biblioteka za proveravanje formata unetih podataka u formu.
+
+- Axios je biblioteka koja olaksava pisanje zahteva za pristup bazi.
+- api putanje se zadaju kao zahtev za pristup bazi, a na ovim stranicama obradjujes zahteve za dohvatanje/dodavanje/brisanje/azuriranje.
+  Na jednoj api stranici mozes imati po jedan post, jedan get, jedan patch i jedan delete. Ne mozes dva post npr.
+  Znaci imas posebnu api stranicu za svaku posebnu post/get/patch/delete obradu, i onda zadajes putanju odgovarajuce api stranice 
+    gde god se salje zahtev za bazu i ceka odgovor.
+- U pages\api se nalazi api za sockete, dakle nije vezan za url putanju nego za konkretan socket
+
+- lib: za utils koje ti pises, tj za najobicnije typescript f-je koje ces cesto koristiti. 
+
+- Zustand je biblioteka koja olaksava upravljanje state-ovima i pisanje sopstvenih hooks.
+- hooks: za hooks koje ti pravis, logika sa state-ovima koju bi koristio na vise razlicitih mesta.
+=================================================================================================================================
+=================================================================================================================================
+=================================================================================================================================
